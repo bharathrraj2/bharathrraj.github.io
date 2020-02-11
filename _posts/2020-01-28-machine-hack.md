@@ -2,7 +2,8 @@
 title: "Example-MachineHack"
 date: 2020-01-28
 tags: [data wrangling, data science, messy data]
-classes: wide
+classes: widen
+toc: true
 header:
   image: "/images/perceptron/percept.jpg"
 excerpt: "Data Wrangling, Data Science, Messy Data"
