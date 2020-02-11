@@ -84,7 +84,7 @@ analytics:
 
 # Site Author
 author:
-  name             : "Bharath Raj123"
+  name             : "Bharath Raj"
   avatar           : "/images/bio-pic-2.jpg" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
   bio              : "Data Science Portfolio"
   location         : "Bangalore - India"
@@ -249,6 +249,7 @@ defaults:
       type: posts
     values:
       layout: single
+      classes: wide
       author_profile: true
       read_time: true
       comments: # true
