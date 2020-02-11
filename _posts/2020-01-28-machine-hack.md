@@ -3,6 +3,7 @@ title: "Example-MachineHack"
 date: 2020-01-28
 tags: [data wrangling, data science, messy data]
 excerpt: "Data Wrangling, Data Science, Messy Data"
+classes: wide
 ---
 
 ```python
