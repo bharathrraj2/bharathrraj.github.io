@@ -87,7 +87,7 @@ author:
   name             : "Bharath Raj123"
   avatar           : "/images/bio-pic-2.jpg" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
   bio              : "Data Science Portfolio"
-  location         : "Bangalore, India"
+  location         : "Bangalore - India"
   email            :
   uri              :
   home             : # null (default), "absolute or relative url to link to author home"
@@ -248,7 +248,6 @@ defaults:
       type: posts
     values:
       layout: single
-      classes: wide
       author_profile: true
       read_time: true
       comments: # true
@@ -261,5 +260,4 @@ defaults:
       type: pages
     values:
       layout: single
-      classes: wide
       author_profile: true
