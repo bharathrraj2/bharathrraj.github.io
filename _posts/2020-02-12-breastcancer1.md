@@ -947,7 +947,7 @@ sns.pairplot(data=data,hue = 'target',vars = ['mean radius', 'mean texture', 'me
 
 
 
-![png](output_22_1.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_22_1.png)
 
 
 
@@ -971,7 +971,7 @@ sns.pairplot(data=data,hue = 'target',vars = ['radius error', 'texture error', '
 
 
 
-![png](output_24_1.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_24_1.png)
 
 
 
@@ -989,7 +989,7 @@ sns.pairplot(data=data,hue = 'target',vars = ['worst radius', 'worst texture','w
 
 
 
-![png](output_25_1.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_25_1.png)
 
 
 
@@ -1027,123 +1027,37 @@ for var in cont_vars:
 ```
 
 
-![png](output_29_0.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_0.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_1.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_2.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_3.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_4.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_5.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_6.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_7.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_8.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_9.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_10.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_11.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_12.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_13.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_14.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_15.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_16.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_17.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_18.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_19.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_20.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_21.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_22.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_23.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_24.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_25.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_26.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_27.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_28.png)
+![alt]({{ site.url }}{{ site.baseurl }}/images/breast_cancer_1/output_29_29.png)
 
-
-
-![png](output_29_1.png)
-
-
-
-![png](output_29_2.png)
-
-
-
-![png](output_29_3.png)
-
-
-
-![png](output_29_4.png)
-
-
-
-![png](output_29_5.png)
-
-
-
-![png](output_29_6.png)
-
-
-
-![png](output_29_7.png)
-
-
-
-![png](output_29_8.png)
-
-
-
-![png](output_29_9.png)
-
-
-
-![png](output_29_10.png)
-
-
-
-![png](output_29_11.png)
-
-
-
-![png](output_29_12.png)
-
-
-
-![png](output_29_13.png)
-
-
-
-![png](output_29_14.png)
-
-
-
-![png](output_29_15.png)
-
-
-
-![png](output_29_16.png)
-
-
-
-![png](output_29_17.png)
-
-
-
-![png](output_29_18.png)
-
-
-
-![png](output_29_19.png)
-
-
-
-![png](output_29_20.png)
-
-
-
-![png](output_29_21.png)
-
-
-
-![png](output_29_22.png)
-
-
-
-![png](output_29_23.png)
-
-
-
-![png](output_29_24.png)
-
-
-
-![png](output_29_25.png)
-
-
-
-![png](output_29_26.png)
-
-
-
-![png](output_29_27.png)
-
-
-
-![png](output_29_28.png)
-
-
-
-![png](output_29_29.png)
 
 
 
