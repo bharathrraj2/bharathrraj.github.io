@@ -1070,14 +1070,13 @@ for var in cont_vars:
 #### Histogram Analysis :
 
 1. Histogram looks normal for most of the variables.
-
-2. Mainly standard error variables looks skewed,we can try log transformation for them. Note some of them have zeros values.
+2. Histogram for some standard error variables looks skewed,we can try log transformation for them. Note that some of them have zeros values.
 
 
 #### Outliers Analysis :
-1. Most of the features have many outliers according to box plot
 
-2. We can without any outlier removal and also try winsorization techniques
+1. Most of the features have many outliers according to box plot analysis.
+2. We can try without any outlier removal and also try some winsorization techniques.
 
 
 ```python
