@@ -1067,16 +1067,17 @@ for var in cont_vars:
 
 ### Summary - Basic Data Analysis
 
-#### Histogram Analysis
-Try without any changes
-Try log for standard error variables, note some have zeros
+#### Histogram Analysis :
 
-#### Outliers : Most of the features have many outliers according to box plot
-Try without any changes
-Try removing outlier 0.1%
-Try binning
+1. Histogram looks normal for most of the variables.
 
-#### No nulls in the data set or test set
+2. Mainly standard error variables looks skewed,we can try log transformation for them. Note some of them have zeros values.
+
+
+#### Outliers Analysis :
+1. Most of the features have many outliers according to box plot
+
+2. We can without any outlier removal and also try winsorization techniques
 
 
 ```python

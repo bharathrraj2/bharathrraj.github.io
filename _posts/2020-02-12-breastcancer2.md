@@ -342,12 +342,6 @@ from sklearn.grid_search import GridSearchCV
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 ```
 
-    /anaconda3/lib/python3.7/site-packages/sklearn/cross_validation.py:41: DeprecationWarning: This module was deprecated in version 0.18 in favor of the model_selection module into which all the refactored classes and functions are moved. Also note that the interface of the new CV iterators are different from that of this module. This module will be removed in 0.20.
-      "This module will be removed in 0.20.", DeprecationWarning)
-    /anaconda3/lib/python3.7/site-packages/sklearn/grid_search.py:42: DeprecationWarning: This module was deprecated in version 0.18 in favor of the model_selection module into which all the refactored classes and functions are moved. This module will be removed in 0.20.
-      DeprecationWarning)
-
-
 
 ```python
 pipeline = Pipeline([
@@ -425,10 +419,71 @@ confusion_matrix(y_test,y_pred)
 
 
 
+#### We got a very good accuracy with a basic model itself. Next we can try to see if it can be improved further.
+
+# Remove correlated features
+
 
 ```python
+def correlation(dataset, threshold):
+    col_corr = set()  # Set of all the names of correlated columns
+    corr_matrix = dataset.corr()
+    for i in range(len(corr_matrix.columns)):
+        for j in range(i):
+            if abs(corr_matrix.iloc[i, j]) > threshold: # we are interested in absolute coeff value
+                colname = corr_matrix.columns[i]  # getting the name of column
+                col_corr.add(colname)
+    return col_corr
 
+X_train,X_test,y_train,y_test = train_test_split(data[cont_vars],data['target'],test_size=0.2, random_state=0)
+
+corr_features = correlation(X_train, 0.9)
+print('correlated features: ', len(set(corr_features)) )
+
+corr_features
+
+X_train.drop(labels=corr_features, axis=1, inplace=True)
+X_test.drop(labels=corr_features, axis=1, inplace=True)
+
+sel_columns = X_train.columns
+
+pipeline = Pipeline([
+    ('standard_scale',StandardScaler())
+])
+
+X_train = pipeline.fit_transform(X_train,y_train)
+X_test = pipeline.transform(X_test)
+
+model = SVC(C=10,gamma=0.01)
+model.fit(X_train,y_train)
+y_pred = model.predict(X_test)
+accuracy_score(y_pred,y_test)
 ```
+
+    correlated features:  10
+
+
+
+
+
+    0.9824561403508771
+
+
+
+
+```python
+confusion_matrix(y_test,y_pred)
+```
+
+
+
+
+    array([[45,  2],
+           [ 0, 67]])
+
+
+
+#### No change in performance after removing 10 highly correlated features. We will continue to remove them in future models
 
 # SVC Model Tuning
 
@@ -451,43 +506,43 @@ gsearch1.grid_scores_, gsearch1.best_params_, gsearch1.best_score_
     [CV] C=0.1 ...........................................................
     [CV] C=0.1 ...........................................................
     [CV] C=0.1 ...........................................................
-    [CV] .................................. C=0.1, score=0.947368 -   0.0s
     [CV] .................................. C=0.1, score=0.895652 -   0.0s
     [CV] C=1 .............................................................
-    [CV] .................................. C=0.1, score=0.938053 -   0.0s
+    [CV] .................................. C=0.1, score=0.929825 -   0.0s
     [CV] C=1 .............................................................
+    [CV] .................................. C=0.1, score=0.920354 -   0.0s
+    [CV] .................................... C=1, score=0.947826 -   0.0s
     [CV] C=1 .............................................................
-    [CV] .................................. C=0.1, score=0.973451 -   0.0s
-    [CV] .................................... C=1, score=0.965217 -   0.0s
-    [CV] .................................... C=1, score=0.964912 -   0.0s
+    [CV] .................................. C=0.1, score=0.946903 -   0.0s
     [CV] C=1 .............................................................
-    [CV] .................................... C=1, score=0.964602 -   0.0s
+    [CV] .................................... C=1, score=0.947368 -   0.0s
     [CV] C=10 ............................................................
-    [CV] .................................... C=1, score=1.000000 -   0.0s
-    [CV] ................................... C=10, score=0.973913 -   0.0s
+    [CV] .................................... C=1, score=0.973451 -   0.0s
+    [CV] .................................... C=1, score=0.982301 -   0.0s
+    [CV] ................................... C=10, score=0.982609 -   0.0s
     [CV] C=10 ............................................................
-    [CV] ................................... C=10, score=0.956140 -   0.0s
+    [CV] ................................... C=10, score=0.947368 -   0.0s
     [CV] C=10 ............................................................
-    [CV] ................................... C=10, score=0.955752 -   0.0s
+    [CV] ................................... C=10, score=0.946903 -   0.0s
     [CV] C=10 ............................................................
-    [CV] ................................... C=10, score=0.991150 -   0.0s
+    [CV] ................................... C=10, score=0.973451 -   0.0s
 
 
-    [Parallel(n_jobs=4)]: Batch computation too fast (0.0532s.) Setting batch_size=6.
+    [Parallel(n_jobs=4)]: Batch computation too fast (0.0386s.) Setting batch_size=10.
     [Parallel(n_jobs=4)]: Done   3 out of  12 | elapsed:    0.1s remaining:    0.2s
     [Parallel(n_jobs=4)]: Done   5 out of  12 | elapsed:    0.1s remaining:    0.1s
     [Parallel(n_jobs=4)]: Done   7 out of  12 | elapsed:    0.1s remaining:    0.1s
-    [Parallel(n_jobs=4)]: Done  12 out of  12 | elapsed:    0.2s finished
+    [Parallel(n_jobs=4)]: Done  12 out of  12 | elapsed:    0.1s finished
 
 
 
 
 
-    ([mean: 0.93863, std: 0.02800, params: {'C': 0.1},
-      mean: 0.97368, std: 0.01520, params: {'C': 1},
-      mean: 0.96924, std: 0.01462, params: {'C': 10}],
+    ([mean: 0.92318, std: 0.01852, params: {'C': 0.1},
+      mean: 0.96274, std: 0.01546, params: {'C': 1},
+      mean: 0.96258, std: 0.01578, params: {'C': 10}],
      {'C': 1},
-     0.9736828604794017)
+     0.9627366800996334)
 
 
 
@@ -511,99 +566,95 @@ gsearch1.grid_scores_, gsearch1.best_params_, gsearch1.best_score_
     [CV] C=0.1, gamma=0.01 ...............................................
     [CV] C=0.1, gamma=0.01 ...............................................
     [CV] C=0.1, gamma=0.01 ...............................................
-    [CV] ...................... C=0.1, gamma=0.01, score=0.913043 -   0.0s
+    [CV] ...................... C=0.1, gamma=0.01, score=0.886957 -   0.0s
+    [CV] ...................... C=0.1, gamma=0.01, score=0.894737 -   0.0s
     [CV] C=0.1, gamma=0.1 ................................................
-    [CV] ...................... C=0.1, gamma=0.01, score=0.947368 -   0.0s
-    [CV] ...................... C=0.1, gamma=0.01, score=0.946903 -   0.0s
+    [CV] ...................... C=0.1, gamma=0.01, score=0.920354 -   0.0s
+    [CV] ...................... C=0.1, gamma=0.01, score=0.920354 -   0.0s
     [CV] C=0.1, gamma=0.1 ................................................
+    [CV] ....................... C=0.1, gamma=0.1, score=0.904348 -   0.0s
     [CV] C=0.1, gamma=0.1 ................................................
-    [CV] ...................... C=0.1, gamma=0.01, score=0.955752 -   0.0s
-    [CV] ....................... C=0.1, gamma=0.1, score=0.913043 -   0.0s
+    [CV] ....................... C=0.1, gamma=0.1, score=0.894737 -   0.0s
     [CV] C=0.1, gamma=0.1 ................................................
-    [CV] ....................... C=0.1, gamma=0.1, score=0.938596 -   0.0s
     [CV] C=0.1, gamma=1 ..................................................
-    [CV] ....................... C=0.1, gamma=0.1, score=0.929204 -   0.0s
-    [CV] ....................... C=0.1, gamma=0.1, score=0.911504 -   0.0s
-    [CV] C=10, gamma=0.01 ................................................
-    [CV] C=10, gamma=1 ...................................................
-    [CV] ......................... C=0.1, gamma=1, score=0.634783 -   0.0s
-    [CV] ....................... C=10, gamma=0.01, score=0.991304 -   0.0s
-    [CV] C=0.1, gamma=1 ..................................................
-    [CV] C=10, gamma=0.01 ................................................
+    [CV] ....................... C=0.1, gamma=0.1, score=0.893805 -   0.0s
     [CV] C=1, gamma=0.1 ..................................................
-    [CV] ....................... C=10, gamma=0.01, score=0.964912 -   0.0s
-    [CV] C=10, gamma=0.01 ................................................
-    [CV] .......................... C=10, gamma=1, score=0.643478 -   0.0s
-    [CV] C=10, gamma=1 ...................................................
-    [CV] ......................... C=0.1, gamma=1, score=0.640351 -   0.0s
-    [CV] ....................... C=10, gamma=0.01, score=0.982301 -   0.0s
-    [CV] C=0.1, gamma=1 ..................................................
-    [CV] C=10, gamma=0.01 ................................................
-    [CV] ......................... C=1, gamma=0.1, score=0.956522 -   0.0s
-    [CV] C=1, gamma=0.1 ..................................................
-    [CV] ....................... C=10, gamma=0.01, score=1.000000 -   0.0s
     [CV] C=10, gamma=0.1 .................................................
-    [CV] ......................... C=1, gamma=0.1, score=0.929825 -   0.0s
-    [CV] C=1, gamma=0.1 ..................................................
-    [CV] .......................... C=10, gamma=1, score=0.640351 -   0.0s
-    [CV] C=10, gamma=1 ...................................................
-    [CV] ........................ C=10, gamma=0.1, score=0.956522 -   0.0s
-    [CV] ......................... C=0.1, gamma=1, score=0.637168 -   0.0s
-    [CV] C=10, gamma=0.1 .................................................
-    [CV] C=0.1, gamma=1 ..................................................
+    [CV] ....................... C=0.1, gamma=0.1, score=0.902655 -   0.0s
     [CV] ......................... C=1, gamma=0.1, score=0.955752 -   0.0s
+    [CV] ........................ C=10, gamma=0.1, score=0.982609 -   0.0s
+    [CV] ......................... C=0.1, gamma=1, score=0.634783 -   0.0s
     [CV] C=1, gamma=0.1 ..................................................
+    [CV] C=10, gamma=0.1 .................................................
+    [CV] C=0.1, gamma=1 ..................................................
+    [CV] ......................... C=1, gamma=0.1, score=0.982301 -   0.0s
     [CV] ........................ C=10, gamma=0.1, score=0.938596 -   0.0s
-    [CV] C=10, gamma=0.1 .................................................
-    [CV] ......................... C=1, gamma=0.1, score=0.964602 -   0.0s
     [CV] C=1, gamma=1 ....................................................
-    [CV] ........................ C=10, gamma=0.1, score=0.929204 -   0.0s
     [CV] C=10, gamma=0.1 .................................................
-    [CV] ......................... C=0.1, gamma=1, score=0.637168 -   0.0s
-    [CV] ........................ C=10, gamma=0.1, score=0.964602 -   0.0s
-    [CV] .......................... C=10, gamma=1, score=0.646018 -   0.0s
-    [CV] C=1, gamma=0.01 .................................................
-    [CV] C=10, gamma=1 ...................................................
+    [CV] ......................... C=0.1, gamma=1, score=0.640351 -   0.0s
+    [CV] C=0.1, gamma=1 ..................................................
+    [CV] ........................ C=10, gamma=0.1, score=0.938053 -   0.0s
+    [CV] C=10, gamma=0.1 .................................................
     [CV] ........................... C=1, gamma=1, score=0.643478 -   0.0s
     [CV] C=1, gamma=1 ....................................................
-    [CV] ........................ C=1, gamma=0.01, score=0.947826 -   0.0s
+    [CV] ........................ C=10, gamma=0.1, score=0.955752 -   0.0s
+    [CV] ......................... C=0.1, gamma=1, score=0.637168 -   0.0s
+    [CV] C=10, gamma=1 ...................................................
+    [CV] C=0.1, gamma=1 ..................................................
+    [CV] ........................... C=1, gamma=1, score=0.657895 -   0.0s
+    [CV] C=1, gamma=1 ....................................................
+    [CV] ......................... C=0.1, gamma=1, score=0.637168 -   0.0s
+    [CV] .......................... C=10, gamma=1, score=0.660870 -   0.0s
     [CV] C=1, gamma=0.01 .................................................
+    [CV] C=10, gamma=1 ...................................................
+    [CV] ........................... C=1, gamma=1, score=0.663717 -   0.0s
+    [CV] ........................ C=1, gamma=0.01, score=0.939130 -   0.0s
+    [CV] C=1, gamma=1 ....................................................
+    [CV] C=1, gamma=0.01 .................................................
+    [CV] .......................... C=10, gamma=1, score=0.666667 -   0.0s
     [CV] ........................ C=1, gamma=0.01, score=0.964912 -   0.0s
     [CV] C=1, gamma=0.01 .................................................
-    [CV] .......................... C=10, gamma=1, score=0.637168 -   0.0s
-
-
-    [Parallel(n_jobs=4)]: Batch computation too fast (0.0442s.) Setting batch_size=8.
-    [Parallel(n_jobs=4)]: Done   5 tasks      | elapsed:    0.1s
-
-
-    [CV] ........................... C=1, gamma=1, score=0.640351 -   0.0s
-    [CV] C=1, gamma=1 ....................................................
-    [CV] ........................ C=1, gamma=0.01, score=0.955752 -   0.0s
-    [CV] C=1, gamma=0.01 .................................................
-    [CV] ........................ C=1, gamma=0.01, score=0.991150 -   0.0s
-    [CV] ........................... C=1, gamma=1, score=0.646018 -   0.0s
-    [CV] C=1, gamma=1 ....................................................
+    [CV] C=10, gamma=1 ...................................................
     [CV] ........................... C=1, gamma=1, score=0.637168 -   0.0s
+    [CV] ........................ C=1, gamma=0.01, score=0.964602 -   0.0s
+    [CV] C=1, gamma=0.01 .................................................
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] ....................... C=10, gamma=0.01, score=0.982609 -   0.0s
+    [CV] .......................... C=10, gamma=1, score=0.690265 -   0.0s
+    [CV] ........................ C=1, gamma=0.01, score=0.964602 -   0.0s
+    [CV] C=10, gamma=1 ...................................................
+    [CV] C=1, gamma=0.1 ..................................................
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] ....................... C=10, gamma=0.01, score=0.964912 -   0.0s
+    [CV] ......................... C=1, gamma=0.1, score=0.947826 -   0.0s
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] C=1, gamma=0.1 ..................................................
+    [CV] .......................... C=10, gamma=1, score=0.654867 -   0.0s
+    [CV] ....................... C=10, gamma=0.01, score=0.973451 -   0.0s
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] ......................... C=1, gamma=0.1, score=0.956140 -   0.0s
+    [CV] ....................... C=10, gamma=0.01, score=0.982301 -   0.0s
 
 
-    [Parallel(n_jobs=4)]: Done  36 out of  36 | elapsed:    0.3s finished
+    [Parallel(n_jobs=4)]: Batch computation too fast (0.0356s.) Setting batch_size=10.
+    [Parallel(n_jobs=4)]: Done   5 out of  36 | elapsed:    0.1s remaining:    0.4s
+    [Parallel(n_jobs=4)]: Done  36 out of  36 | elapsed:    0.2s finished
 
 
 
 
 
-    ([mean: 0.94077, std: 0.01639, params: {'C': 0.1, 'gamma': 0.01},
-      mean: 0.92309, std: 0.01132, params: {'C': 0.1, 'gamma': 0.1},
+    ([mean: 0.90560, std: 0.01501, params: {'C': 0.1, 'gamma': 0.01},
+      mean: 0.89889, std: 0.00467, params: {'C': 0.1, 'gamma': 0.1},
       mean: 0.63737, std: 0.00198, params: {'C': 0.1, 'gamma': 1},
-      mean: 0.96491, std: 0.01631, params: {'C': 1, 'gamma': 0.01},
-      mean: 0.95168, std: 0.01308, params: {'C': 1, 'gamma': 0.1},
-      mean: 0.64175, std: 0.00332, params: {'C': 1, 'gamma': 1},
-      mean: 0.98463, std: 0.01299, params: {'C': 10, 'gamma': 0.01},
-      mean: 0.94723, std: 0.01403, params: {'C': 10, 'gamma': 0.1},
-      mean: 0.64175, std: 0.00332, params: {'C': 10, 'gamma': 1}],
+      mean: 0.95831, std: 0.01107, params: {'C': 1, 'gamma': 0.01},
+      mean: 0.96050, std: 0.01301, params: {'C': 1, 'gamma': 0.1},
+      mean: 0.65056, std: 0.01068, params: {'C': 1, 'gamma': 1},
+      mean: 0.97582, std: 0.00729, params: {'C': 10, 'gamma': 0.01},
+      mean: 0.95375, std: 0.01812, params: {'C': 10, 'gamma': 0.1},
+      mean: 0.66817, std: 0.01342, params: {'C': 10, 'gamma': 1}],
      {'C': 10, 'gamma': 0.01},
-     0.9846293783708984)
+     0.9758182971858272)
 
 
 
@@ -631,29 +682,26 @@ confusion_matrix(y_test,y_pred)
 
 
 
-    array([[46,  1],
-           [ 1, 66]])
+    array([[45,  2],
+           [ 0, 67]])
 
 
 
-
-```python
-
-```
+#### We can use parameters C=10,gamma=0.01 as chosen by grid search techniques (though no change is seen in test results)
 
 ## XGB Classifier
 
 
 ```python
 param_test1 = {
- 'learning_rate' : [0.05,0.1],
-  'n_estimators' : [100,500,800],
+ 'learning_rate' : [0.045,0.05,0.055],
+  'n_estimators' : [300],
    'max_depth':[5]
 }
 
 gsearch1 = GridSearchCV(estimator =  XGBClassifier(
- subsample=0.9,
- colsample_bytree=0.9,
+ subsample=0.8,
+ colsample_bytree=0.8,
  objective = 'binary:logistic',
  nthread=4,
  seed=0),
@@ -663,33 +711,13 @@ param_grid = param_test1, scoring='accuracy',n_jobs=4,iid=False, cv=4, verbose=1
 
 gsearch1.fit(X_train,y_train)
 gsearch1.grid_scores_, gsearch1.best_params_, gsearch1.best_score_
-
-
-
-
 ```
 
-    Fitting 4 folds for each of 6 candidates, totalling 24 fits
-    [CV] learning_rate=0.05, max_depth=5, n_estimators=100 ...............
-    [CV] learning_rate=0.05, max_depth=5, n_estimators=100 ...............
-    [CV] learning_rate=0.05, max_depth=5, n_estimators=100 ...............
-    [CV] learning_rate=0.05, max_depth=5, n_estimators=100 ...............
-
-
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.05, max_depth=5, n_estimators=100, score=0.929825 -   0.2s
-    [CV] learning_rate=0.05, max_depth=5, n_estimators=500 ...............
-
-
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.05, max_depth=5, n_estimators=100, score=0.964602 -   0.2s
-    [CV] learning_rate=0.05, max_depth=5, n_estimators=500 ...............
+    Fitting 4 folds for each of 3 candidates, totalling 12 fits
+    [CV] learning_rate=0.045, max_depth=5, n_estimators=300 ..............
+    [CV] learning_rate=0.045, max_depth=5, n_estimators=300 ..............
+    [CV] learning_rate=0.045, max_depth=5, n_estimators=300 ..............
+    [CV] learning_rate=0.045, max_depth=5, n_estimators=300 ..............
 
 
     /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
@@ -698,195 +726,111 @@ gsearch1.grid_scores_, gsearch1.best_params_, gsearch1.best_score_
       if diff:
 
 
-    [CV]  learning_rate=0.05, max_depth=5, n_estimators=100, score=0.982301 -   0.2s
-    [CV]  learning_rate=0.05, max_depth=5, n_estimators=100, score=0.956522 -   0.2s
-    [CV] learning_rate=0.05, max_depth=5, n_estimators=500 ...............
-    [CV] learning_rate=0.05, max_depth=5, n_estimators=500 ...............
-
-
-    [Parallel(n_jobs=4)]: Batch computation too fast (0.1960s.) Setting batch_size=2.
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.05, max_depth=5, n_estimators=500, score=0.973451 -   0.4s
-    [CV] learning_rate=0.05, max_depth=5, n_estimators=800 ...............
+    [CV]  learning_rate=0.045, max_depth=5, n_estimators=300, score=0.938596 -   0.3s
+    [CV]  learning_rate=0.045, max_depth=5, n_estimators=300, score=0.982301 -   0.2s
+    [CV] learning_rate=0.05, max_depth=5, n_estimators=300 ...............
+    [CV] learning_rate=0.05, max_depth=5, n_estimators=300 ...............
 
 
     /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
       if diff:
 
 
-    [CV]  learning_rate=0.05, max_depth=5, n_estimators=500, score=0.973913 -   0.6s
-    [CV] learning_rate=0.05, max_depth=5, n_estimators=800 ...............
+    [CV]  learning_rate=0.045, max_depth=5, n_estimators=300, score=0.964602 -   0.4s
+    [CV] learning_rate=0.05, max_depth=5, n_estimators=300 ...............
+
+
+    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
+      if diff:
+
+
+    [CV]  learning_rate=0.045, max_depth=5, n_estimators=300, score=0.956522 -   0.5s
+    [CV] learning_rate=0.05, max_depth=5, n_estimators=300 ...............
+
+
+    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
+      if diff:
+
+
+    [CV]  learning_rate=0.05, max_depth=5, n_estimators=300, score=0.964602 -   0.1s
+    [CV] learning_rate=0.055, max_depth=5, n_estimators=300 ..............
+
+
+    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
+      if diff:
+
+
+    [CV]  learning_rate=0.05, max_depth=5, n_estimators=300, score=0.965217 -   0.4s
+    [CV] learning_rate=0.055, max_depth=5, n_estimators=300 ..............
+
+
+    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
+      if diff:
+
+
+    [CV]  learning_rate=0.05, max_depth=5, n_estimators=300, score=0.938596 -   0.4s
+    [CV] learning_rate=0.055, max_depth=5, n_estimators=300 ..............
+
+
+    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
+      if diff:
+
+
+    [CV]  learning_rate=0.05, max_depth=5, n_estimators=300, score=0.982301 -   0.3s
+    [CV] learning_rate=0.055, max_depth=5, n_estimators=300 ..............
 
 
     [Parallel(n_jobs=4)]: Done   5 tasks      | elapsed:    0.6s
+    [Parallel(n_jobs=4)]: Done   7 out of  12 | elapsed:    0.7s remaining:    0.5s
     /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
       if diff:
 
 
-    [CV]  learning_rate=0.05, max_depth=5, n_estimators=500, score=0.973451 -   0.7s
-    [CV] learning_rate=0.1, max_depth=5, n_estimators=100 ................
-
-
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.05, max_depth=5, n_estimators=500, score=0.929825 -   0.7s
-    [CV] learning_rate=0.1, max_depth=5, n_estimators=100 ................
+    [CV]  learning_rate=0.055, max_depth=5, n_estimators=300, score=0.965217 -   0.4s
 
 
     /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
       if diff:
 
 
-    [CV]  learning_rate=0.1, max_depth=5, n_estimators=100, score=0.973451 -   0.3s
-    [CV] learning_rate=0.1, max_depth=5, n_estimators=100 ................
+    [CV]  learning_rate=0.055, max_depth=5, n_estimators=300, score=0.929825 -   0.4s
 
 
     /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
       if diff:
 
 
-    [CV]  learning_rate=0.1, max_depth=5, n_estimators=100, score=0.956522 -   0.3s
-    [CV] learning_rate=0.1, max_depth=5, n_estimators=100 ................
+    [CV]  learning_rate=0.055, max_depth=5, n_estimators=300, score=0.982301 -   0.4s
 
 
     /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
       if diff:
 
 
-    [CV]  learning_rate=0.1, max_depth=5, n_estimators=100, score=0.938596 -   0.2s
-    [CV] learning_rate=0.1, max_depth=5, n_estimators=500 ................
+    [CV]  learning_rate=0.055, max_depth=5, n_estimators=300, score=0.973451 -   0.4s
 
 
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.1, max_depth=5, n_estimators=100, score=0.991150 -   0.3s
-    [CV] learning_rate=0.1, max_depth=5, n_estimators=500 ................
-
-
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.05, max_depth=5, n_estimators=800, score=0.973913 -   1.1s
-    [CV] learning_rate=0.05, max_depth=5, n_estimators=800 ...............
-
-
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.05, max_depth=5, n_estimators=800, score=0.973451 -   1.1s
-    [CV] learning_rate=0.05, max_depth=5, n_estimators=800 ...............
-
-
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.1, max_depth=5, n_estimators=500, score=0.973451 -   0.5s
-    [CV] learning_rate=0.1, max_depth=5, n_estimators=500 ................
-
-
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.1, max_depth=5, n_estimators=500, score=0.982609 -   0.5s
-    [CV] learning_rate=0.1, max_depth=5, n_estimators=500 ................
-
-
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.05, max_depth=5, n_estimators=800, score=0.929825 -   0.7s
-    [CV] learning_rate=0.1, max_depth=5, n_estimators=800 ................
-
-
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.1, max_depth=5, n_estimators=500, score=0.947368 -   0.4s
-    [CV] learning_rate=0.1, max_depth=5, n_estimators=800 ................
-
-
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.1, max_depth=5, n_estimators=500, score=0.991150 -   0.5s
-
-
-    [Parallel(n_jobs=4)]: Done  14 out of  24 | elapsed:    2.4s remaining:    1.7s
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.05, max_depth=5, n_estimators=800, score=0.973451 -   1.1s
-
-
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.1, max_depth=5, n_estimators=800, score=0.973913 -   0.7s
-    [CV] learning_rate=0.1, max_depth=5, n_estimators=800 ................
-
-
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.1, max_depth=5, n_estimators=800, score=0.973451 -   0.8s
-    [CV] learning_rate=0.1, max_depth=5, n_estimators=800 ................
-
-
-    [Parallel(n_jobs=4)]: Done  20 out of  24 | elapsed:    3.0s remaining:    0.6s
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.1, max_depth=5, n_estimators=800, score=0.947368 -   0.3s
-
-
-    /anaconda3/lib/python3.7/site-packages/sklearn/preprocessing/label.py:151: DeprecationWarning: The truth value of an empty array is ambiguous. Returning False, but in future this will result in an error. Use `array.size > 0` to check that an array is not empty.
-      if diff:
-
-
-    [CV]  learning_rate=0.1, max_depth=5, n_estimators=800, score=0.991150 -   0.3s
-
-
-    [Parallel(n_jobs=4)]: Done  24 out of  24 | elapsed:    3.5s finished
+    [Parallel(n_jobs=4)]: Done   9 out of  12 | elapsed:    1.0s remaining:    0.3s
+    [Parallel(n_jobs=4)]: Done  12 out of  12 | elapsed:    1.2s finished
 
 
 
 
 
-    ([mean: 0.95831, std: 0.01891, params: {'learning_rate': 0.05, 'max_depth': 5, 'n_estimators': 100},
-      mean: 0.96266, std: 0.01896, params: {'learning_rate': 0.05, 'max_depth': 5, 'n_estimators': 500},
-      mean: 0.96266, std: 0.01896, params: {'learning_rate': 0.05, 'max_depth': 5, 'n_estimators': 800},
-      mean: 0.96493, std: 0.01952, params: {'learning_rate': 0.1, 'max_depth': 5, 'n_estimators': 100},
-      mean: 0.97364, std: 0.01641, params: {'learning_rate': 0.1, 'max_depth': 5, 'n_estimators': 500},
-      mean: 0.97147, std: 0.01564, params: {'learning_rate': 0.1, 'max_depth': 5, 'n_estimators': 800}],
-     {'learning_rate': 0.1, 'max_depth': 5, 'n_estimators': 500},
-     0.9736447216540773)
+    ([mean: 0.96051, std: 0.01571, params: {'learning_rate': 0.045, 'max_depth': 5, 'n_estimators': 300},
+      mean: 0.96268, std: 0.01561, params: {'learning_rate': 0.05, 'max_depth': 5, 'n_estimators': 300},
+      mean: 0.96270, std: 0.01992, params: {'learning_rate': 0.055, 'max_depth': 5, 'n_estimators': 300}],
+     {'learning_rate': 0.055, 'max_depth': 5, 'n_estimators': 300},
+     0.9626985412743093)
 
 
 
 
 ```python
 model = XGBClassifier(
- learning_rate= 0.1, max_depth= 5, n_estimators=500,
- subsample=0.9,
- colsample_bytree=0.9,
+ learning_rate= 0.055, max_depth= 5, n_estimators=300,
+ subsample=0.8,
+ colsample_bytree=0.8,
  objective = 'binary:logistic',
  nthread=4,
  seed=0)
@@ -898,12 +842,12 @@ model.fit(X_train,y_train)
 
 
     XGBClassifier(base_score=0.5, booster='gbtree', colsample_bylevel=1,
-           colsample_bynode=1, colsample_bytree=0.9, gamma=0,
-           learning_rate=0.1, max_delta_step=0, max_depth=5,
-           min_child_weight=1, missing=None, n_estimators=500, n_jobs=1,
+           colsample_bynode=1, colsample_bytree=0.8, gamma=0,
+           learning_rate=0.055, max_delta_step=0, max_depth=5,
+           min_child_weight=1, missing=None, n_estimators=300, n_jobs=1,
            nthread=4, objective='binary:logistic', random_state=0, reg_alpha=0,
            reg_lambda=1, scale_pos_weight=1, seed=0, silent=None,
-           subsample=0.9, verbosity=1)
+           subsample=0.8, verbosity=1)
 
 
 
@@ -920,7 +864,7 @@ accuracy_score(y_pred,y_test)
 
 
 
-    0.9912280701754386
+    0.956140350877193
 
 
 
@@ -932,15 +876,15 @@ confusion_matrix(y_test,y_pred)
 
 
 
-    array([[47,  0],
-           [ 1, 66]])
+    array([[44,  3],
+           [ 2, 65]])
 
 
 
 
 ```python
 ser = pd.Series(model.feature_importances_)
-ser.index = cont_vars
+ser.index = sel_columns
 ser = ser.sort_values(ascending=False)
 ser.plot.bar(figsize=(15,6))
 ```
@@ -948,7 +892,7 @@ ser.plot.bar(figsize=(15,6))
 
 
 
-    <matplotlib.axes._subplots.AxesSubplot at 0x1a1afbaa90>
+    <matplotlib.axes._subplots.AxesSubplot at 0x1a1e7d27b8>
 
 
 
@@ -984,14 +928,422 @@ accuracy_score(model.predict(X_test),y_test)
 
 
 
+    0.956140350877193
+
+
+
+#### XGB Classifier seems to provide lower performance. Modelling is almost done with SVC.
+#### We can quickly try other techniques as summarized in Data Analysis section, namely - outliers, log conversion
+
+## Try with removing outlier 0.1%
+
+
+```python
+from feature_engine.outlier_removers import Winsorizer
+```
+
+
+```python
+Winsorizer()
+```
+
+
+
+
+    Winsorizer(distribution='gaussian', fold=3, tail='right', variables=None)
+
+
+
+
+```python
+X_train,X_test,y_train,y_test = train_test_split(data[sel_columns],data['target'],test_size=0.2, random_state=0)
+pipeline = Pipeline([
+    ('standard_scale',StandardScaler())
+])
+
+X_train = pipeline.fit_transform(X_train,y_train)
+X_test = pipeline.transform(X_test)
+
+model = SVC(C=10,gamma=0.01)
+model.fit(X_train,y_train)
+y_pred = model.predict(X_test)
+accuracy_score(y_pred,y_test)
+
+
+
+```
+
+
+
+
+    0.9824561403508771
+
+
+
+
+```python
+X_train,X_test,y_train,y_test = train_test_split(data[sel_columns],data['target'],test_size=0.2, random_state=0)
+pipeline = Pipeline([
+    ('outliers',Winsorizer()),
+    ('standard_scale',StandardScaler())
+])
+
+X_train = pipeline.fit_transform(X_train,y_train)
+X_test = pipeline.transform(X_test)
+
+model = SVC(C=10,gamma=0.01)
+model.fit(X_train,y_train)
+y_pred = model.predict(X_test)
+accuracy_score(y_pred,y_test)
+```
+
+
+
+
     0.9912280701754386
 
 
 
 
 ```python
+confusion_matrix(y_test,y_pred)
+```
+
+
+
+
+    array([[46,  1],
+           [ 0, 67]])
+
+
+
+#### Winsorization seems to have improved the score, lets check the results with grid search as well
+
+
+```python
+## Without Winsorization
+
+X_train,X_test,y_train,y_test = train_test_split(data[sel_columns],data['target'],test_size=0.2, random_state=0)
+pipeline = Pipeline([
+    ('standard_scale',StandardScaler())
+])
+
+X_train = pipeline.fit_transform(X_train,y_train)
+X_test = pipeline.transform(X_test)
+
+
+param_test1 = {
+ 'C':[10],
+  'gamma':[0.01]
+}
+
+gsearch1 = GridSearchCV(estimator =  SVC(), 
+param_grid = param_test1, scoring='accuracy',n_jobs=4,iid=False, cv=4, verbose=10)
+
+
+gsearch1.fit(X_train,y_train)
+gsearch1.grid_scores_, gsearch1.best_params_, gsearch1.best_score_
+
 
 ```
+
+    Fitting 4 folds for each of 1 candidates, totalling 4 fits
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] ....................... C=10, gamma=0.01, score=0.982609 -   0.0s
+    [CV] ....................... C=10, gamma=0.01, score=0.964912 -   0.0s
+    [CV] ....................... C=10, gamma=0.01, score=0.973451 -   0.0s
+    [CV] ....................... C=10, gamma=0.01, score=0.982301 -   0.0s
+
+
+    [Parallel(n_jobs=4)]: Done   1 tasks      | elapsed:    0.0s
+    [Parallel(n_jobs=4)]: Batch computation too fast (0.0297s.) Setting batch_size=12.
+    [Parallel(n_jobs=4)]: Done   2 out of   4 | elapsed:    0.0s remaining:    0.0s
+    [Parallel(n_jobs=4)]: Done   4 out of   4 | elapsed:    0.0s remaining:    0.0s
+    [Parallel(n_jobs=4)]: Done   4 out of   4 | elapsed:    0.0s finished
+
+
+
+
+
+    ([mean: 0.97582, std: 0.00729, params: {'C': 10, 'gamma': 0.01}],
+     {'C': 10, 'gamma': 0.01},
+     0.9758182971858272)
+
+
+
+
+```python
+## With Winsorization
+
+X_train,X_test,y_train,y_test = train_test_split(data[sel_columns],data['target'],test_size=0.2, random_state=0)
+pipeline = Pipeline([
+    ('outliers',Winsorizer()),
+    ('standard_scale',StandardScaler())
+])
+
+X_train = pipeline.fit_transform(X_train,y_train)
+X_test = pipeline.transform(X_test)
+
+
+param_test1 = {
+ 'C':[10],
+  'gamma':[0.01]
+}
+
+gsearch1 = GridSearchCV(estimator =  SVC(), 
+param_grid = param_test1, scoring='accuracy',n_jobs=4,iid=False, cv=4, verbose=10)
+
+
+gsearch1.fit(X_train,y_train)
+gsearch1.grid_scores_, gsearch1.best_params_, gsearch1.best_score_
+
+
+
+```
+
+    Fitting 4 folds for each of 1 candidates, totalling 4 fits
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] ....................... C=10, gamma=0.01, score=0.991304 -   0.0s
+    [CV] ....................... C=10, gamma=0.01, score=0.964912 -   0.0s
+    [CV] ....................... C=10, gamma=0.01, score=0.982301 -   0.0s
+    [CV] ....................... C=10, gamma=0.01, score=0.982301 -   0.0s
+
+
+    [Parallel(n_jobs=4)]: Done   1 tasks      | elapsed:    0.0s
+    [Parallel(n_jobs=4)]: Batch computation too fast (0.0280s.) Setting batch_size=14.
+    [Parallel(n_jobs=4)]: Done   2 out of   4 | elapsed:    0.0s remaining:    0.0s
+    [Parallel(n_jobs=4)]: Done   4 out of   4 | elapsed:    0.0s remaining:    0.0s
+    [Parallel(n_jobs=4)]: Done   4 out of   4 | elapsed:    0.0s finished
+
+
+
+
+
+    ([mean: 0.98020, std: 0.00956, params: {'C': 10, 'gamma': 0.01}],
+     {'C': 10, 'gamma': 0.01},
+     0.9802045996098364)
+
+
+
+#### Grid search confirms the improvement with winsorization
+
+## Try converting values to Log
+
+
+```python
+LogCols = (data[sel_columns].min() > 0)
+```
+
+
+```python
+Log_Columns = LogCols[LogCols == True].index.to_list()
+```
+
+
+```python
+Log_Columns # Convert only these columns to log
+```
+
+
+
+
+    ['mean radius',
+     'mean texture',
+     'mean smoothness',
+     'mean compactness',
+     'mean symmetry',
+     'mean fractal dimension',
+     'radius error',
+     'texture error',
+     'smoothness error',
+     'compactness error',
+     'symmetry error',
+     'fractal dimension error',
+     'worst smoothness',
+     'worst compactness',
+     'worst symmetry',
+     'worst fractal dimension']
+
+
+
+
+```python
+data1=data.copy() # Perform convertion on a copy
+data1[Log_Columns] = np.log(data1[Log_Columns])
+
+X_train,X_test,y_train,y_test = train_test_split(data1[sel_columns],data1['target'],test_size=0.2, random_state=0)
+
+
+pipeline = Pipeline([
+    ('outliers',Winsorizer()),
+    ('standard_scale',StandardScaler())
+])
+
+X_train = pipeline.fit_transform(X_train,y_train)
+X_test = pipeline.transform(X_test)
+
+model = SVC(C=10,gamma=0.01)
+model.fit(X_train,y_train)
+y_pred = model.predict(X_test)
+accuracy_score(y_pred,y_test)
+
+
+
+
+```
+
+
+
+
+    0.9912280701754386
+
+
+
+#### No improvement seen with log conversion, lets confirm with grid search as well
+
+
+```python
+## Without Log conversion
+
+X_train,X_test,y_train,y_test = train_test_split(data[sel_columns],data['target'],test_size=0.2, random_state=0)
+pipeline = Pipeline([
+    ('outliers',Winsorizer()),
+    ('standard_scale',StandardScaler())
+])
+
+X_train = pipeline.fit_transform(X_train,y_train)
+X_test = pipeline.transform(X_test)
+
+
+param_test1 = {
+ 'C':[10],
+  'gamma':[0.01]
+}
+
+gsearch1 = GridSearchCV(estimator =  SVC(), 
+param_grid = param_test1, scoring='accuracy',n_jobs=4,iid=False, cv=4, verbose=10)
+
+
+gsearch1.fit(X_train,y_train)
+gsearch1.grid_scores_, gsearch1.best_params_, gsearch1.best_score_
+```
+
+    Fitting 4 folds for each of 1 candidates, totalling 4 fits
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] ....................... C=10, gamma=0.01, score=0.991304 -   0.0s
+    [CV] ....................... C=10, gamma=0.01, score=0.964912 -   0.0s
+    [CV] ....................... C=10, gamma=0.01, score=0.982301 -   0.0s
+    [CV] ....................... C=10, gamma=0.01, score=0.982301 -   0.0s
+
+
+    [Parallel(n_jobs=4)]: Done   1 tasks      | elapsed:    0.0s
+    [Parallel(n_jobs=4)]: Batch computation too fast (0.0262s.) Setting batch_size=14.
+    [Parallel(n_jobs=4)]: Done   2 out of   4 | elapsed:    0.0s remaining:    0.0s
+    [Parallel(n_jobs=4)]: Done   4 out of   4 | elapsed:    0.0s remaining:    0.0s
+    [Parallel(n_jobs=4)]: Done   4 out of   4 | elapsed:    0.0s finished
+
+
+
+
+
+    ([mean: 0.98020, std: 0.00956, params: {'C': 10, 'gamma': 0.01}],
+     {'C': 10, 'gamma': 0.01},
+     0.9802045996098364)
+
+
+
+
+```python
+## With Log conversion
+
+X_train,X_test,y_train,y_test = train_test_split(data1[sel_columns],data['target'],test_size=0.2, random_state=0)
+
+pipeline = Pipeline([
+    ('outliers',Winsorizer()),
+    ('standard_scale',StandardScaler())
+])
+
+X_train = pipeline.fit_transform(X_train,y_train)
+X_test = pipeline.transform(X_test)
+
+
+param_test1 = {
+ 'C':[10],
+  'gamma':[0.01]
+}
+
+gsearch1 = GridSearchCV(estimator =  SVC(), 
+param_grid = param_test1, scoring='accuracy',n_jobs=4,iid=False, cv=4, verbose=10)
+
+
+gsearch1.fit(X_train,y_train)
+gsearch1.grid_scores_, gsearch1.best_params_, gsearch1.best_score_
+
+```
+
+    Fitting 4 folds for each of 1 candidates, totalling 4 fits
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] C=10, gamma=0.01 ................................................
+    [CV] ....................... C=10, gamma=0.01, score=0.982609 -   0.0s
+    [CV] ....................... C=10, gamma=0.01, score=0.947368 -   0.0s
+    [CV] ....................... C=10, gamma=0.01, score=0.973451 -   0.0s
+    [CV] ....................... C=10, gamma=0.01, score=0.982301 -   0.0s
+
+
+    [Parallel(n_jobs=4)]: Done   1 tasks      | elapsed:    0.0s
+    [Parallel(n_jobs=4)]: Batch computation too fast (0.0243s.) Setting batch_size=16.
+    [Parallel(n_jobs=4)]: Done   2 out of   4 | elapsed:    0.0s remaining:    0.0s
+    [Parallel(n_jobs=4)]: Done   4 out of   4 | elapsed:    0.0s remaining:    0.0s
+    [Parallel(n_jobs=4)]: Done   4 out of   4 | elapsed:    0.0s finished
+
+
+
+
+
+    ([mean: 0.97143, std: 0.01437, params: {'C': 10, 'gamma': 0.01}],
+     {'C': 10, 'gamma': 0.01},
+     0.9714323322735464)
+
+
+
+#### Overall score seems to have reduced. Hence we wont use Log transformation
+
+# Final Model and CV Score
+
+
+```python
+X_train,X_test,y_train,y_test = train_test_split(data[sel_columns],data['target'],test_size=0.2, random_state=0)
+pipeline = Pipeline([
+    ('outliers',Winsorizer()),
+    ('standard_scale',StandardScaler())
+])
+
+X_train = pipeline.fit_transform(X_train,y_train)
+X_test = pipeline.transform(X_test)
+
+model = SVC(C=10,gamma=0.01)
+model.fit(X_train,y_train)
+y_pred = model.predict(X_test)
+accuracy_score(y_pred,y_test)
+```
+
+
+
+
+    0.9912280701754386
+
+
 
 
 ```python
