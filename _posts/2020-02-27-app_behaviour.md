@@ -8,7 +8,7 @@ excerpt: "data science, classification, machine learning, fintech, mobile app"
 mathjax: "true"
 ---
 
-# App Data Analysis
+# Fintech App Data Analysis
 
 ### 1. Free trials for an app are provided to the users for a month
 ### 2. We need to predict who among them gets enrolled to the app post the free trails
