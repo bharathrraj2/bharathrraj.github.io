@@ -1,4 +1,3 @@
-
 ---
 title: "Fintech App Data : Analysis & Modelling"
 date: 2020-02-27
